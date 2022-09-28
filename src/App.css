@@ -1,3 +1,94 @@
+
+.cadastro{
+  display: flex;
+  justify-content: center;
+  margin-left: 8%;
+  margin-right: 15%;
+}
+.botaocadastrar{
+  margin: 10px;
+  padding: 15px;
+  border:none;
+  color:rgb(255, 255, 255);
+  font-size: 30px;
+  cursor: pointer;
+  background-color: #56fabe;
+  border-radius: 20px;
+
+  
+}
+input{
+  width: 80%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.11);
+}
+
+.Titulo{
+  background-color:#000000a1;
+  text-align: center;
+  padding: 25px;
+  font-size: 22px;
+  color: white;
+}
+.customers {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  text-align: center;
+}
+
+.customers td, #customers th {
+  padding: 8px;
+  
+}
+
+.customers tr:nth-child(even){background-color: #f2f2f2;}
+
+.customers tr:hover {background-color: #ddd;}
+
+.customers th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #04AA6D;
+  color: white;
+  text-align: center;
+}
+
+
+li{
+  list-style-type: none; 
+  display: inline;
+  margin:4px;
+}
+.botao{
+  margin-top: 19px;
+  padding: 15px;
+  border:none;
+  color:black;
+  cursor: pointer;
+  width: 110px;
+}
+
+.botao:hover{
+  background-color: #000000a1;
+  border:none;
+  color: white;
+  cursor: pointer;
+}
+
+.botaoadd{
+  background-color: rgba(90, 245, 90, 0.247);
+}
+.botaodeletar{
+  background-color: rgba(233, 117, 113, 0.247);
+}
+
+
+
 .App {
   text-align: center;
 }
@@ -36,3 +127,18 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
