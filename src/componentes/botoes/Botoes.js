@@ -1,13 +1,13 @@
 import '../../App.css';
-import Botao_editar from '../../componentes/botoes/crud_botoes/Botao_editar';
-import Botao_deletar from '../../componentes/botoes/crud_botoes/Botao_deletar'
+import BotaoEditar from '../../componentes/botoes/crud_botoes/BotaoEditar';
+import BotaoDeletar from '../../componentes/botoes/crud_botoes/BotaoDeletar'
 
 function Botoes() {
     return (
 
         <div>
-            <li><Botao_editar /></li>
-            <li><Botao_deletar /></li>
+            <li><BotaoEditar /></li>
+            <li><BotaoDeletar /></li>
         </div>
 
     );

@@ -1,9 +1,9 @@
 import '../../../App.css';
 
-function Botao_editar() {
+function BotaoEditar() {
   return (
      <button className="botao botaoadd">Editar</button>
   );
 }
 
-export default Botao_editar;
+export default BotaoEditar;

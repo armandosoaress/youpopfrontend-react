@@ -140,4 +140,21 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 10px;
+}
+.grid-item {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+}
+.inputscontainer {
+  background-color: rgba(255, 255, 255, 0.8);
+  border:1px solid black;
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+}

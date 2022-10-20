@@ -1,8 +1,8 @@
 import '../../../App.css';
 
-function Botao_deletar() {
+function BotaoDeletar() {
   return (
      <button className="botao botaodeletar">Deletar</button>
   );
 }
-export default Botao_deletar;
+export default BotaoDeletar;
