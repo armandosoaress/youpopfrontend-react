@@ -1,8 +1,7 @@
-import React, { Component } from "react";  
-import Swal from "sweetalert2";  
+import Swal from "sweetalert2"; 
 
-function service(url,body,endpoint) {
-  fetch('http://localhost/api/api/'+url, {
+function service(url,body) {
+  fetch('https://armandosoares.com.br/tanayoupop/backend/api'+url, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -10,7 +9,7 @@ function service(url,body,endpoint) {
         },
         body: JSON.stringify(body)
       }).then((result) => {
-        if (endpoint == 'login') {
+        if (url === '/login') {
           switch (result.status) {
             case 401: erro()
             break;
@@ -27,6 +26,8 @@ function service(url,body,endpoint) {
           type: 'success',  
           text: 'Login correto.',  
       }); 
+      localStorage.setItem('eusouinevitavel', true);
+      window.location = "/dashboard";
     }
       function erro() {
         Swal.fire({  
@@ -34,7 +35,7 @@ function service(url,body,endpoint) {
           type: 'error',  
           text: 'Login incorreto.',  
       });   
-
+      localStorage.setItem('eusouinevitavel', false);
       }
 }
 export default service 

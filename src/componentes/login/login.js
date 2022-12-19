@@ -1,6 +1,6 @@
 import '../../../src/App.css';
 import '../login/css/style.css'
-import '../login/css/bootstrap.min.css'
+import '../login/css/layout.css'
 import { useState } from 'react'
 import service from "../../componentes/api/service/services";
 
@@ -12,9 +12,9 @@ function Loginlayout() {
     e.preventDefault()
     if (name && password) {
       return service(
-        'auth/login',
-        { "user": name, "password": password },
-        'login'
+        '/login',
+        { "email": name, 
+        "password": password }
       );
     } else {
       alert('Preencha os dois campos')

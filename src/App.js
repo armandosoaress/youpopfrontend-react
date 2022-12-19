@@ -1,25 +1,6 @@
 import './App.css';
-// import Grid from './componentes/login/Login';
-import{ BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom'
-import Login from './page/Login/Login';
+import React from "react";
+import Routes  from './routes';
 
-
-
-function App() {
-  return (
-    <>
-    <Router>
-
-      {/* <ul>
-        <li><Link to='/'>INICIO</Link></li>
-        <li><Link to='/login'>INICIO</Link></li>
-      </ul> */}
-      <Switch>
-      <Route path="/login" name="Login" component={Login} />
-      </Switch>
-    </Router>
-   </>
-  );
-}
+const App = () =>  <Routes />;
 export default App;
-  

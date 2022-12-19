@@ -3,7 +3,8 @@ import Loginlayout from "../../componentes/login/login"
 function Login() {
   return (
     <>
-    <Loginlayout/></>
+    <Loginlayout/>
+    </>
   );
 }
 export default Login;

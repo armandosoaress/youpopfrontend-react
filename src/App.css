@@ -1,4 +1,7 @@
 
+.usersdados{
+cursor: pointer;
+}
 .cadastro{
   display: flex;
   justify-content: center;
