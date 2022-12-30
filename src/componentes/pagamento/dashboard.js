@@ -3,25 +3,24 @@ import React, { useState, useEffect } from 'react';
 import Swal from "sweetalert2";
 
 
-
-var count = 0;
 function Dashboardlayout() {
 
-    if (localStorage.getItem('user_permition') >=5) {
+    if (localStorage.getItem('user_permition') >= 3) {
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
             text: 'Usuario sem permição!',
-          })
-          setTimeout(function() {
+        })
+        setTimeout(function () {
             window.location.href = "/";
-          }, 1000)
+        }, 1000)
+
     }
 
 
     const [data, setData] = useState([]);
     const [userlog, setUserlog] = useState([]);
-    const [supervisor, setsupervisores] = useState([]);
+    const [pagamento, setpagamento] = useState([]);
 
 
     const header = new Headers();
@@ -29,7 +28,19 @@ function Dashboardlayout() {
     header.append('Content-Type', 'application/json');
 
     //get pra os options de cadastros de user acima delses
-    function criaroptions() {
+    function criaroptions(motoboy) {
+        if (motoboy) {
+            fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/listoptions", {
+                method: 'get',
+                headers: header,
+            })
+                .then((response) => response.json())
+                .then((responseJson) => (
+                    addoptionsmotoboy(responseJson)
+                ));
+            return
+        }
+
         fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/listoptions", {
             method: 'get',
             headers: header,
@@ -39,9 +50,10 @@ function Dashboardlayout() {
                 addoptions(responseJson)
             ));
     }
-    var supervisoresoptions, recrutadoresoptions, coordenadoresoptions, chooptions = "";
+    var supervisoresoptions, recrutadoresoptions, coordenadoresoptions, chooptions, motoboyoption = "";
 
     const addoptions = async (responseJson) => {
+        console.log(responseJson);
         Object.values(responseJson.supervisores).map(supervisores => (
             supervisoresoptions += "<option value='" + supervisores.id + "'>" + supervisores.name + "</option>"
         ))
@@ -53,19 +65,34 @@ function Dashboardlayout() {
             coordenadoresoptions += "<option value='" + coordenadores.id + "'>" + coordenadores.name + "</option>"
 
         ))
-        Object.values(responseJson.chos).map(chos => (
-            chooptions += "<option value='" + chos.id + "'>" + chos.name + "</option>"
+        Object.values(responseJson.chos).map(cho => (
+            chooptions += "<option value='" + cho.id + "'>" + cho.name + "</option>"
+
+        ))
+
+        Object.values(responseJson.motoboys).map(motoboy => (
+            motoboyoption += "<option value='" + motoboy.id + "'>" + motoboy.name + "</option>"
 
         ))
 
         critaruser(supervisoresoptions, recrutadoresoptions, coordenadoresoptions, chooptions)
 
     }
+
+    const addoptionsmotoboy = async (responseJson) => {
+        Object.values(responseJson.motoboys).map(motoboy => (
+            motoboyoption += "<option value='" + motoboy.id + "'>" + motoboy.name + "  (" + motoboy.email + ")  " + "</option>"
+
+        ))
+        criaroptionsmotoboys(motoboyoption)
+    }
+
+
+
     //fim
 
 
     const getUsers = async () => {
-
 
         fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/userlogado", {
             method: 'get',
@@ -76,7 +103,7 @@ function Dashboardlayout() {
                 userlogado(responseJson)
             ));
 
-        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/coordenadorusers?id=" + localStorage.getItem('user_coordenador'), {
+        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/pagamento", {
             method: 'get',
             headers: header,
         })
@@ -85,32 +112,25 @@ function Dashboardlayout() {
                 insertuser(responseJson)
             ));
 
-        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/recrutadorusers?id=" + localStorage.getItem('user_recrutador'), {
+        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/pagamentoid?id=" + localStorage.getItem('id_cobranca'), {
             method: 'get',
             headers: header,
         })
             .then((response) => response.json())
             .then((responseJson) => (
-                supervisoresuser(responseJson)
+                pagamentousers(responseJson)
             ));
 
+    }
+
+    const insertuser = async (responseJson) => {
+        setData(responseJson.data);
     }
     const userlogado = async (responseJson) => {
         setUserlog(responseJson.user);
     }
-    const insertuser = async (responseJson) => {
-        setData(responseJson.Recrutadores);
-    }
-    const supervisoresuser = async (responseJson) => {
-        if (responseJson.message == "página não disponível") {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Nenhum supervisor encontrado!',
-            })
-            return
-        }
-        setsupervisores(responseJson.Supervisores);
+    const pagamentousers = async (responseJson) => {
+        setpagamento(responseJson);
     }
 
     const logininvalid = async (responseJson) => {
@@ -139,11 +159,27 @@ function Dashboardlayout() {
 
 
     function create(id_dependent, user) {
+        
+        let bodyContent = JSON.stringify({
+            "name": localStorage.getItem('namecad'),
+            "email": localStorage.getItem('mailcad'),
+        });
+        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/cadcliente", {
+            method: 'post',
+            headers: header,
+            body: bodyContent,
+        })
+            .then((response) => response.json())
+            .then((responseJson) => (
+                localStorage.setItem('customer_id', responseJson.id)
+            ))
+
         switch (user) {
             case "motoboy":
                 var data = {
                     "email": localStorage.getItem('mailcad'),
                     "nome": localStorage.getItem('namecad'),
+                    "customer_assas": localStorage.getItem('customer_id'),
                     "dependent_supervisor": id_dependent
                 };
                 fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/storemotoboy", {
@@ -189,7 +225,7 @@ function Dashboardlayout() {
                 var data = {
                     "email": localStorage.getItem('mailcad'),
                     "nome": localStorage.getItem('namecad'),
-                    "dependent_cho": id_dependent
+                    "dependent_pagamento": id_dependent
                 };
                 fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/storecoordenador", {
                     method: 'post',
@@ -200,7 +236,7 @@ function Dashboardlayout() {
                         logininvalid(responseJson.Status)
                     ));
                 break;
-            case "Cho":
+            case "cho":
                 var data = {
                     "email": localStorage.getItem('mailcad'),
                     "nome": localStorage.getItem('namecad'),
@@ -218,7 +254,7 @@ function Dashboardlayout() {
         }
     }
 
-    function critaruser(supervisoresoptions, recrutadoresoptions, coordenadoresoptions, chooptions) {
+    function critaruser(supervisoresoptions, recrutadoresoptions, coordenadoresoptions, pagamentooptions) {
         const { value: formValues } = Swal.fire({
             title: 'Cadastrar',
             confirmButtonText: 'Cadastrar',
@@ -226,7 +262,7 @@ function Dashboardlayout() {
                 '<input placeholder="Nome" id="name" class="swal2-input">' +
                 '<input id="email" placeholder="Email"  type="email" class="swal2-input">' +
                 '<p></p>' +
-                '<select id="access" style="margin-top:16px; float:left;margin-left:93px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" ><option value="Recrutador">Recrutador</option><option value="Supervisor">Supervisor</option><option value="motoboy">Motoboy</option></select>',
+                '<select id="access" style="margin-top:16px; float:left;margin-left:93px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" ><option value="Cho">Cho</option> <option value="Coordenador">Coordenador</option><option value="Recrutador">Recrutador</option><option value="Supervisor">Supervisor</option><option selected value="motoboy">Motoboy</option></select>',
         }).then((result) => {
             localStorage.setItem('mailcad', document.getElementById("email").value)
             localStorage.setItem('namecad', document.getElementById("name").value)
@@ -260,9 +296,6 @@ function Dashboardlayout() {
                             })
                         break;
                     case "Recrutador":
-                        if (localStorage.getItem('user_permition') == 3) {
-                            create(localStorage.getItem('id_user_log'), "Recrutador")
-                        }
                         Swal.fire({
                             title: 'Complete o cadastro',
                             confirmButtonText: 'Cadastrar',
@@ -280,7 +313,7 @@ function Dashboardlayout() {
                             title: 'Complete o cadastro',
                             confirmButtonText: 'Cadastrar',
                             html:
-                                '<p>CHO</p>' +
+                                '<p>Cho</p>' +
                                 '<select id="cho" style="margin-top:16px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" >' + chooptions + '</select>'
                         }).then((result) => {
                             if (result.isConfirmed) {
@@ -297,7 +330,7 @@ function Dashboardlayout() {
                                 '<select id="admin" style="margin-top:16px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" ><option value="1">Armando soares</option></select>'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                create(document.getElementById("admin").value, "Cho")
+                                create(document.getElementById("admin").value, "cho")
                             }
                         })
                         break;
@@ -310,14 +343,12 @@ function Dashboardlayout() {
         })
     }
 
-
-
     function redirect(id) {
-        localStorage.setItem('user_recrutador', (id));
+        localStorage.setItem('id_cobranca', (id));
         Swal.fire({
             title: 'Aguarde!',
             html: ' <b>Carregando</b>.',
-            timer: 2000,
+            timer: 2400,
             timerProgressBar: true,
             didOpen: () => {
                 Swal.showLoading()
@@ -333,8 +364,8 @@ function Dashboardlayout() {
     }
 
     function redirectdependent(id) {
-        localStorage.setItem('user_supervisor', (id));
-        window.location.href = "/dashboardsupervisor";
+        localStorage.setItem('user_coordenador', (id));
+        window.location.href = "/dashboardcoodenador";
     }
 
     function editar(params) {
@@ -353,17 +384,6 @@ function Dashboardlayout() {
             }
         })
     }
-    function redirecteditar(params) {
-        localStorage.setItem("useredit", params);
-        window.location.href = "/dashboard/editar";
-    }
-
-    function hierarchy(params) {
-        if (count == 0) {
-          redirect(params);
-        }
-        count = 1;
-    }
 
     function editaruserlogado(params) {
         Swal.fire({
@@ -378,6 +398,142 @@ function Dashboardlayout() {
         })
     }
 
+
+    function redirecteditar(params) {
+        localStorage.setItem("useredit", params);
+        window.location.href = "/dashboard/editar";
+    }
+
+    var cor, text;
+    function defininedcor(params) {
+        if (params.status == "PENDING") {
+            return ["#ff00009c", "Pendente"];
+        } else {
+            return ["#61f388db", "Recebido"]
+        }
+    }
+
+
+    var cont = 0;
+    function nome(params) {
+        if (cont == 0) {
+            fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/cliente?id=" + params.customer, {
+                method: 'get',
+                headers: header,
+            })
+                .then((response) => response.json())
+                .then((responseJson) => (
+                    localStorage.setItem('6trn', responseJson.name)
+                ))
+        }
+        cont = 1;
+
+    }
+
+    var idmotoboy = 0;
+    function criaroptionsmotoboys(params) {
+        console.log(params);
+        Swal.fire({
+            title: 'Selecione o motoboy',
+            confirmButtonText: 'Cadastrar fatura',
+            showDenyButton: true,
+            denyButtonText: `Cadastrar motoboy`,
+            denyButtonColor: '#19e951',
+            html:
+                '<p>Motoboy</p>' +
+                '<select id="motoboyselected" style="margin-top:16px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" >' + params + '</select>'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                idmotoboy = document.getElementById("motoboyselected").value;
+                Swal.fire({
+                    title: 'Selecione o motoboy',
+                    confirmButtonText: 'Complete',
+                    denyButtonText: `Cadastrar fatura`,
+                    html:
+                        '<p>Valor</p>' +
+                        '<input  min="5" type="number" style="padding:14px;" placeholder="0" id="valorfatura" ></input>' +
+                        '<p>Venciemento</p>' +
+                        '<input type="date" style="padding:14px;margin-top:3px" id="venciementofatura" ></input>'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (document.getElementById("valorfatura").value <= 6) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Não é permitido valores menores que 6.00 R$',
+                            })
+                        }
+
+                        const date1 = new Date();
+                        const date2 = new Date(document.getElementById("venciementofatura").value);
+
+                        if (date1.getTime() < date2.getTime()) {
+                            customer(idmotoboy)
+                            let bodyContent = JSON.stringify({
+                                "customer": localStorage.getItem('customer_id'),
+                                "billingType": "UNDEFINED",
+                                "dueDate": document.getElementById("venciementofatura").value,
+                                "value": document.getElementById("valorfatura").value,
+                                "description": "Youpop",
+                                "externalReference": idmotoboy
+                            });
+                            fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/pagamento", {
+                                method: 'post',
+                                headers: header,
+                                body: bodyContent,
+                            })
+                                .then((response) => response.json())
+                                .then((responseJson) => (
+                                    console.log(responseJson),
+                                    validacadcobranca(responseJson.status)
+                                ))
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Data invalida!',
+                            })
+                        }
+
+                    }
+                })
+
+            } else if (result.isDenied) {
+                criaroptions();
+            }
+        })
+        function validacadcobranca(params) {
+            if (params == "PENDING") {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Fatura cadastrada',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            } else {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'erro',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            }
+        }
+    }
+
+
+    function customer(id) {
+        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/custumermy?id=" + id, {
+            method: 'get',
+            headers: header,
+        }).then((response) => response.json())
+            .then((responseJson) => (
+                localStorage.setItem('customer_id', responseJson.customer)
+            ))
+    }
+    
     return (
         <>
             <div className="bg-gray-100 dark:bg-gray-900 dark:text-white text-gray-600 h-screen flex overflow-hidden text-sm">
@@ -402,7 +558,7 @@ function Dashboardlayout() {
 
                     <div className="flex-grow flex overflow-x-hidden">
                         <div className="xl:w-72 w-48 flex-shrink-0 border-r border-gray-200 dark:border-gray-800 h-full overflow-y-auto lg:block hidden p-5">
-                            <div className="text-xs text-gray-400 tracking-wider">CHO</div>
+                            <div className="text-xs text-gray-400 tracking-wider">pagamento</div>
                             <div className="relative mt-2">
                                 <input type="text" className="pl-8 h-9 bg-transparent border border-gray-300 dark:border-gray-700 dark:text-white w-full rounded-md text-sm" placeholder="Search" />
                                 <svg viewBox="0 0 24 24" className="w-4 absolute text-gray-400 top-1/2 transform translate-x-0.5 -translate-y-1/2 left-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -412,16 +568,18 @@ function Dashboardlayout() {
                             </div>
                             <div className="space-y-4 mt-3">
                                 {
-                                    Object.values(data).map(recrutador => (
-                                        hierarchy(recrutador.id),
+                                    Object.values(data).map(data => (
+                                        cor = defininedcor(data)[0],
+                                        text = defininedcor(data)[1],
+                                        nome(data),
                                         <>
-                                            <button onClick={() => redirect(recrutador.id)} className="bg-white p-3 w-full flex flex-col rounded-md dark:bg-gray-800 shadow">
+                                            <button onClick={() => redirect(data.id)} className=" p-3 w-full flex flex-col rounded-md dark:bg-gray-800 shadow" style={{ backgroundColor: cor }}>
                                                 <div className="flex xl:flex-row flex-col items-center font-medium text-gray-900 dark:text-white pb-2 mb-2 xl:border-b border-gray-200 border-opacity-75 dark:border-gray-700 w-full">
                                                     <img src="https://images.unsplash.com/photo-1541647376583-8934aaf3448a?ixlib=rb-1.2.1&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&ixid=eyJhcHBfaWQiOjE3Nzg0fQ" className="w-7 h-7 mr-2 rounded-full" alt="profile" />
-                                                    {recrutador.name}
+                                                    {text}
                                                 </div>
                                                 <div className="flex items-center w-full">
-                                                    <div className="text-xs py-1 px-2 leading-none dark:bg-gray-900 bg-yellow-100 text-yellow-600 rounded-md">  {recrutador.funcao}</div>
+                                                    <div className="text-xs py-1 px-2 leading-none dark:bg-gray-900 bg-yellow-100 text-yellow-600 rounded-md"> {localStorage.getItem('6trn')}</div>
                                                 </div>
                                             </button>
                                         </>
@@ -432,12 +590,12 @@ function Dashboardlayout() {
                         <div className="flex-grow bg-white dark:bg-gray-900 overflow-y-auto">
                             <div className="sm:px-7 sm:pt-7 px-4 pt-4 flex flex-col w-full border-b border-gray-200 bg-white dark:bg-gray-900 dark:text-white dark:border-gray-800 sticky top-0">
                                 <div className="flex w-full items-center">
-                                    <div onClick={() =>editaruserlogado(localStorage.getItem('id_user_log'))} className="flex items-center text-3xl text-gray-900 dark:text-white">
+                                    <div onClick={() => editaruserlogado(localStorage.getItem('id_user_log'))} className="flex items-center text-3xl text-gray-900 dark:text-white">
                                         <img src="https://assets.codepen.io/344846/internal/avatars/users/default.png?fit=crop&format=auto&height=512&version=1582611188&width=512" className="w-12 mr-4 rounded-full" alt="profile" />
                                         {userlog.name}
                                     </div>
                                     <div className="ml-auto sm:flex hidden items-center justify-end">
-                                       {/* <div className="text-right">
+                                        {/* <div className="text-right">
                                             <div className="text-xs text-gray-400 dark:text-gray-400">março</div>
                                             <div className="text-gray-900 text-lg dark:text-white">R$ 2.456,794.00</div>
                                         </div> */}
@@ -451,62 +609,60 @@ function Dashboardlayout() {
                                     </div>
                                 </div>
                                 <div className="flex items-center space-x-3 sm:mt-7 mt-4">
-                                    <a href="#" className="px-3 border-b-2 border-blue-500 text-blue-500 dark:text-white dark:border-white pb-1.5">Coordenadores</a>
-                                    <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5">Menu 1</a>
-                                    <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5 sm:block hidden">Menu 2</a>
+                                    <a href="#" className="px-3 border-b-2 border-blue-500 text-blue-500 dark:text-white dark:border-white pb-1.5">Pagamentos</a>
+                                    <a onClick={() => criaroptions(true)} className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5">Criar link de pagamento</a>
+                                    {/* <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5 sm:block hidden">Menu 2</a>
                                     <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5 sm:block hidden">Menu 3</a>
-                                    <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5 sm:block hidden">Menu 4</a>
+                                    <a href="#" className="px-3 border-b-2 border-transparent text-gray-600 dark:text-gray-400 pb-1.5 sm:block hidden">Menu 4</a> */}
                                 </div>
                             </div>
                             <div className="sm:p-7 p-4">
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="text-gray-400">
-                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Função</th>
-                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Nome</th>
-                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800 hidden md:table-cell">Telefone</th>
-                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Endereço</th>
-                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Ult.Acesso</th>
+                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Fatura</th>
+                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Valor</th>
+                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800 hidden md:table-cell">Data de criação</th>
+                                            <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Data de pagamento</th>
+                                            {/* <th className="font-normal px-3 pt-0 pb-3 border-b border-gray-200 dark:border-gray-800">Supervisor</th> */}
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-600 dark:text-gray-100">
 
                                         {
-                                            Object.values(supervisor).map(supervisor => (
+                                            <>
+                                                <tr className='usersdados' >
+                                                    <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
+                                                        <div className="flex items-center">
+                                                            <a href={pagamento.bankSlipUrl}>  <button className="buttonpagamento button1pagamento">Vizualizar fatura</button></a>
+                                                        </div>
+                                                    </td>
+                                                    <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
+                                                        <div className="flex items-center">
+                                                            {pagamento.value}
+                                                        </div>
+                                                    </td>
+                                                    <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 md:table-cell hidden"> {pagamento.dateCreated}</td>
+                                                    <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 text-red-500"> {pagamento.clientPaymentDate}</td>
+                                                    <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
+                                                        <div className="flex items-center">
+                                                            {/* <div className="sm:flex hidden flex-col">
+                                                                24.12.2022
+                                                                <div className="text-gray-400 text-xs">11:16 AM</div>
+                                                            </div> */}
+                                                            <button onClick={() => editar(pagamento.id)} className="w-8 h-8 inline-flex items-center justify-center text-gray-400 ml-auto">
+                                                                <svg viewBox="0 0 24 24" className="w-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                                    <circle cx="12" cy="12" r="1"></circle>
+                                                                    <circle cx="19" cy="12" r="1"></circle>
+                                                                    <circle cx="5" cy="12" r="1"></circle>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
 
-                                                <>
-                                                    <tr className='usersdados' >
-                                                        <td onClick={() => redirectdependent(supervisor.id)} className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
-                                                            <div className="flex items-center">
-                                                                {supervisor.funcao}
-                                                            </div>
-                                                        </td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
-                                                            <div className="flex items-center">
-                                                                {supervisor.name}
-                                                            </div>
-                                                        </td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 md:table-cell hidden"> {supervisor.telefone}</td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 text-red-500"> {supervisor.endereco}</td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
-                                                            <div className="flex items-center">
-                                                                <div className="sm:flex hidden flex-col">
-                                                                    24.12.2022
-                                                                    <div className="text-gray-400 text-xs">11:16 AM</div>
-                                                                </div>
-                                                                <button onClick={() => editar(supervisor.id)} className="w-8 h-8 inline-flex items-center justify-center text-gray-400 ml-auto">
-                                                                    <svg viewBox="0 0 24 24" className="w-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <circle cx="12" cy="12" r="1"></circle>
-                                                                        <circle cx="19" cy="12" r="1"></circle>
-                                                                        <circle cx="5" cy="12" r="1"></circle>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                            </>
 
-                                                </>
-                                            ))
                                         }
 
                                     </tbody>

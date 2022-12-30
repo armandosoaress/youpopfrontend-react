@@ -5,27 +5,15 @@ import Swal from "sweetalert2";
 
 
 var count = 0;
-function Dashboardlayout() {
-
-    if (localStorage.getItem('user_permition') >=5) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: 'Usuario sem permição!',
-          })
-          setTimeout(function() {
-            window.location.href = "/";
-          }, 1000)
-    }
-
+function Dashboardmotoboylayout() {
 
     const [data, setData] = useState([]);
     const [userlog, setUserlog] = useState([]);
-    const [supervisor, setsupervisores] = useState([]);
+    const [motoboy, setmotoboy] = useState([]);
 
 
     const header = new Headers();
-    header.append('Authorization', 'Bearer ' + localStorage.getItem('token'));
+    header.append('Authorization', 'Bearer '+localStorage.getItem('token'));
     header.append('Content-Type', 'application/json');
 
     //get pra os options de cadastros de user acima delses
@@ -66,7 +54,6 @@ function Dashboardlayout() {
 
     const getUsers = async () => {
 
-
         fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/userlogado", {
             method: 'get',
             headers: header,
@@ -76,7 +63,7 @@ function Dashboardlayout() {
                 userlogado(responseJson)
             ));
 
-        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/coordenadorusers?id=" + localStorage.getItem('user_coordenador'), {
+            fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/supervisorusers?id=" + localStorage.getItem('user_supervisor'), {
             method: 'get',
             headers: header,
         })
@@ -85,32 +72,26 @@ function Dashboardlayout() {
                 insertuser(responseJson)
             ));
 
-        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/recrutadorusers?id=" + localStorage.getItem('user_recrutador'), {
+        fetch("http://localhost/youpop-plano-eusouinevitavel/backend/api/user?id=" + localStorage.getItem('user_motoboy'), {
             method: 'get',
             headers: header,
         })
             .then((response) => response.json())
             .then((responseJson) => (
-                supervisoresuser(responseJson)
+                motoboysusers(responseJson)
             ));
 
+    }
+
+
+    const insertuser = async (responseJson) => {
+        setData(responseJson.motoboys);
     }
     const userlogado = async (responseJson) => {
         setUserlog(responseJson.user);
     }
-    const insertuser = async (responseJson) => {
-        setData(responseJson.Recrutadores);
-    }
-    const supervisoresuser = async (responseJson) => {
-        if (responseJson.message == "página não disponível") {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Nenhum supervisor encontrado!',
-            })
-            return
-        }
-        setsupervisores(responseJson.Supervisores);
+    const motoboysusers = async (responseJson) => {
+        setmotoboy(responseJson);
     }
 
     const logininvalid = async (responseJson) => {
@@ -226,13 +207,16 @@ function Dashboardlayout() {
                 '<input placeholder="Nome" id="name" class="swal2-input">' +
                 '<input id="email" placeholder="Email"  type="email" class="swal2-input">' +
                 '<p></p>' +
-                '<select id="access" style="margin-top:16px; float:left;margin-left:93px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" ><option value="Recrutador">Recrutador</option><option value="Supervisor">Supervisor</option><option value="motoboy">Motoboy</option></select>',
+                '<select id="access" style="margin-top:16px; float:left;margin-left:93px;border:1px solid #dcd7d7;padding:14px;cursor:pointer;" ><option value="motoboy">Motoboy</option></select>',
         }).then((result) => {
             localStorage.setItem('mailcad', document.getElementById("email").value)
             localStorage.setItem('namecad', document.getElementById("name").value)
             if (result.isConfirmed) {
                 switch (document.getElementById("access").value) {
                     case "motoboy":
+                        if (localStorage.getItem('user_permition') == 5) {
+                            create(localStorage.getItem('id_user_log'), "motoboy")
+                        }
                         Swal.fire({
                             title: 'Complete o cadastro',
                             confirmButtonText: 'Cadastrar',
@@ -246,6 +230,9 @@ function Dashboardlayout() {
                         })
                         break;
                     case "Supervisor":
+                        if (localStorage.getItem('user_permition') == 4) {
+                            create(localStorage.getItem('id_user_log'), "Supervisor")
+                        }
                         Swal.fire({
                             title: 'Complete o cadastro',
                             confirmButtonText: 'Cadastrar',
@@ -260,9 +247,6 @@ function Dashboardlayout() {
                             })
                         break;
                     case "Recrutador":
-                        if (localStorage.getItem('user_permition') == 3) {
-                            create(localStorage.getItem('id_user_log'), "Recrutador")
-                        }
                         Swal.fire({
                             title: 'Complete o cadastro',
                             confirmButtonText: 'Cadastrar',
@@ -310,10 +294,8 @@ function Dashboardlayout() {
         })
     }
 
-
-
     function redirect(id) {
-        localStorage.setItem('user_recrutador', (id));
+        localStorage.setItem('user_motoboy', (id));
         Swal.fire({
             title: 'Aguarde!',
             html: ' <b>Carregando</b>.',
@@ -332,10 +314,6 @@ function Dashboardlayout() {
         getUsers();
     }
 
-    function redirectdependent(id) {
-        localStorage.setItem('user_supervisor', (id));
-        window.location.href = "/dashboardsupervisor";
-    }
 
     function editar(params) {
         Swal.fire({
@@ -364,7 +342,7 @@ function Dashboardlayout() {
         }
         count = 1;
     }
-
+    
     function editaruserlogado(params) {
         Swal.fire({
             title: 'Selecione uma Opção',
@@ -377,7 +355,7 @@ function Dashboardlayout() {
             }
         })
     }
-
+    
     return (
         <>
             <div className="bg-gray-100 dark:bg-gray-900 dark:text-white text-gray-600 h-screen flex overflow-hidden text-sm">
@@ -412,16 +390,16 @@ function Dashboardlayout() {
                             </div>
                             <div className="space-y-4 mt-3">
                                 {
-                                    Object.values(data).map(recrutador => (
-                                        hierarchy(recrutador.id),
+                                    Object.values(data).map(motoboys => (
+                                        // hierarchy(motoboys.id),
                                         <>
-                                            <button onClick={() => redirect(recrutador.id)} className="bg-white p-3 w-full flex flex-col rounded-md dark:bg-gray-800 shadow">
+                                            <button onClick={() => redirect(motoboys.id)}  className="bg-white p-3 w-full flex flex-col rounded-md dark:bg-gray-800 shadow">
                                                 <div className="flex xl:flex-row flex-col items-center font-medium text-gray-900 dark:text-white pb-2 mb-2 xl:border-b border-gray-200 border-opacity-75 dark:border-gray-700 w-full">
                                                     <img src="https://images.unsplash.com/photo-1541647376583-8934aaf3448a?ixlib=rb-1.2.1&q=80&fm=jpg&crop=faces&fit=crop&h=200&w=200&ixid=eyJhcHBfaWQiOjE3Nzg0fQ" className="w-7 h-7 mr-2 rounded-full" alt="profile" />
-                                                    {recrutador.name}
+                                                    {motoboys.name}
                                                 </div>
                                                 <div className="flex items-center w-full">
-                                                    <div className="text-xs py-1 px-2 leading-none dark:bg-gray-900 bg-yellow-100 text-yellow-600 rounded-md">  {recrutador.funcao}</div>
+                                                    <div className="text-xs py-1 px-2 leading-none dark:bg-gray-900 bg-yellow-100 text-yellow-600 rounded-md">  {motoboys.funcao}</div>
                                                 </div>
                                             </button>
                                         </>
@@ -472,29 +450,28 @@ function Dashboardlayout() {
                                     <tbody className="text-gray-600 dark:text-gray-100">
 
                                         {
-                                            Object.values(supervisor).map(supervisor => (
-
+                        
                                                 <>
                                                     <tr className='usersdados' >
-                                                        <td onClick={() => redirectdependent(supervisor.id)} className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
+                                                        <td  className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
                                                             <div className="flex items-center">
-                                                                {supervisor.funcao}
+                                                                {motoboy.funcao}
                                                             </div>
                                                         </td>
                                                         <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
                                                             <div className="flex items-center">
-                                                                {supervisor.name}
+                                                                {motoboy.name}
                                                             </div>
                                                         </td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 md:table-cell hidden"> {supervisor.telefone}</td>
-                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 text-red-500"> {supervisor.endereco}</td>
+                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 md:table-cell hidden"> {motoboy.telefone}</td>
+                                                        <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800 text-red-500"> {motoboy.endereco}</td>
                                                         <td className="sm:p-3 py-2 px-1 border-b border-gray-200 dark:border-gray-800">
                                                             <div className="flex items-center">
                                                                 <div className="sm:flex hidden flex-col">
                                                                     24.12.2022
                                                                     <div className="text-gray-400 text-xs">11:16 AM</div>
                                                                 </div>
-                                                                <button onClick={() => editar(supervisor.id)} className="w-8 h-8 inline-flex items-center justify-center text-gray-400 ml-auto">
+                                                                <button onClick={() => editar(motoboy.id)} className="w-8 h-8 inline-flex items-center justify-center text-gray-400 ml-auto">
                                                                     <svg viewBox="0 0 24 24" className="w-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                                                         <circle cx="12" cy="12" r="1"></circle>
                                                                         <circle cx="19" cy="12" r="1"></circle>
@@ -506,7 +483,7 @@ function Dashboardlayout() {
                                                     </tr>
 
                                                 </>
-                                            ))
+                                           
                                         }
 
                                     </tbody>
@@ -533,4 +510,4 @@ function Dashboardlayout() {
         </>
     );
 }
-export default Dashboardlayout;
+export default Dashboardmotoboylayout;

@@ -1,3 +1,5 @@
+
+
 /*!modern-normalize v1.0.0 | MIT License | https://github.com/sindresorhus/modern-normalize*/
 *,
 *::before,
@@ -10,6 +12,20 @@
     -o-tab-size: 4;
     tab-size: 4
 }
+
+.buttonpagamento {
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+  .button1pagamento {background-color: #4CAF50;} /* Green */
 
 html {
     line-height: 1.15;
@@ -1092,3 +1108,4 @@ video {
 }
 
 @media(min-width:1536px) {}
+

@@ -1,0 +1,5 @@
+local storage{
+customer_id serve para eu saber o customerid do cara para fazer o link de cobrança do cara
+e tambem serve para na hora do cadastro
+
+}
